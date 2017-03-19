@@ -5,21 +5,25 @@ from db_connect import MysqlOprate
 import sha
 secret_key = os.urandom(24)
 app = Flask(__name__)
-app.config.from_object(__name__)
+app.config.from_object("settings")
+DB_HOST = app.config['DB_HOST']
+DB_USER = app.config['DB_USER']
+DB_PORT = app.config['DB_PORT']
+DB_PASSWORD = app.config['DB_PASSWORD']
 
 
-
-app.config.update(dict(
-	DATABASE=os.path.join(app.root_path,'flaskr.db'),
-	SECRET_KEY=secret_key,
-	USERNAME='admin',
-	PASSWORD='fql123'
-	))
-app.config.from_envvar('FLASKR_SETTINGS',silent=True)
+# app.config.update(dict(
+# 	DATABASE=os.path.join(app.root_path,'flaskr.db'),
+# 	SECRET_KEY=secret_key,
+# 	USERNAME='admin',
+# 	PASSWORD='fql123'
+# 	))
+# app.config.from_envvar('FLASKR_SETTINGS',silent=True)
 
 @app.before_request
 def before_reques():
-	g.db = MysqlOprate("localhost","flask_test","123test",3306)
+	#g.db = MysqlOprate("localhost","flask_test","123test",3306)
+	g.db = MysqlOprate(DB_HOST,DB_USER,DB_PASSWORD,DB_PORT)
 
 # @app.teardown_request
 # def teardown_request(exception):
@@ -86,6 +90,7 @@ def register():
 			add_sql = '''insert into test.t_user_info (Fusername,Fpassword) values ("%s","%s")'''%(request.form["username"],handle_pass)
 			ret = g.db.dml_exec(add_sql)
 			if ret == 0:
+				flash('sign up successfully')
 				return redirect(url_for('show_entries'))
 	return render_template('register.html',error=error)
 
